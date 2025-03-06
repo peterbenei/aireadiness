@@ -132,16 +132,6 @@ input[type="email"] {
     cursor: pointer;
 }
 
-.linkedin {
-    background-color: #0077b5;
-    color: white;
-}
-
-.twitter {
-    background-color: #1da1f2;
-    color: white;
-}
-
 /* Role Selection */
 .role-cards {
     display: flex;
