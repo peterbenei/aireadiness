@@ -374,33 +374,33 @@ function restartSurvey() {
     }
 }
 function createGitHubIssue(surveyData) {
-    // You'll need to replace with your actual GitHub API details
-    fetch('https://api.github.com/repos/YOUR-USERNAME/ai-readiness-survey-results/issues', {
+    // WARNING: You'll need to replace placeholders
+    fetch('https://api.github.com/repos/YOUR-GITHUB-USERNAME/ai-readiness-survey-results/issues', {
         method: 'POST',
         headers: {
-            'Authorization': 'token YOUR_GITHUB_TOKEN',
+            'Authorization': 'token YOUR-GITHUB-TOKEN',
             'Content-Type': 'application/json'
         },
         body: JSON.stringify({
-            title: `AI Readiness Survey - ${surveyData.name}`,
-            body: `## Survey Submission
+            title: `AI Readiness Survey - ${userData.name}`,
+            body: `## Survey Results
 
-### User Details
-- **Name**: ${surveyData.name}
-- **Email**: ${surveyData.email}
-- **Company**: ${surveyData.company}
-- **Survey Type**: ${surveyData.surveyType}
+### Personal Info
+- **Name**: ${userData.name}
+- **Email**: ${userData.email}
+- **Company**: ${userData.company}
 
-### Scores
-- **Total Score**: ${surveyData.totalScore}/25
-- **Readiness Level**: ${surveyData.readinessLevel}
+### Survey Details
+- **Survey Type**: ${currentSurvey}
+- **Total Score**: ${totalScore}/25
+- **Readiness Level**: ${readinessLevel}
 
 ### Dimension Scores
-- Dimension 1: ${surveyData.dimensionScores[0]}/5
-- Dimension 2: ${surveyData.dimensionScores[1]}/5
-- Dimension 3: ${surveyData.dimensionScores[2]}/5
-- Dimension 4: ${surveyData.dimensionScores[3]}/5
-- Dimension 5: ${surveyData.dimensionScores[4]}/5
+1. First Dimension: ${scores[0]}/5
+2. Second Dimension: ${scores[1]}/5
+3. Third Dimension: ${scores[2]}/5
+4. Fourth Dimension: ${scores[3]}/5
+5. Fifth Dimension: ${scores[4]}/5
 `,
             labels: ['ai-readiness-survey']
         })
