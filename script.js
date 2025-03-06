@@ -351,7 +351,7 @@ function shareToTwitter() {
 // Function to handle contact button
 function contactUs() {
     // Redirect to your contact page - UPDATE THIS URL TO YOUR ACTUAL CONTACT PAGE
-    window.location.href = 'https://horizon01.co/contact?subject=AI%20Readiness%20Assessment%20Results';
+    window.location.href = 'https://anywhere.consulting/contact';
 }
 
 // Function to restart the survey
