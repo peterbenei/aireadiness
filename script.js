@@ -1,4 +1,14 @@
 // No registration form needed anymore as Tally handles it
+// Event listening function
+document.addEventListener('DOMContentLoaded', function() {
+    // Role card selection
+    document.querySelectorAll('.role-card').forEach(card => {
+        card.addEventListener('click', function() {
+            const role = this.getAttribute('data-role');
+            selectUserType(role);
+        });
+    });
+});
 // Function to save answers for current category
 function saveCurrentCategoryAnswers() {
     const category = currentCategory;
