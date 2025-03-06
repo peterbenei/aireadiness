@@ -373,3 +373,37 @@ function restartSurvey() {
         answers = [];
     }
 }
+function createGitHubIssue(surveyData) {
+    // You'll need to use GitHub API or a service like GitHub Actions
+    fetch('YOUR_GITHUB_API_ENDPOINT', {
+        method: 'POST',
+        headers: {
+            'Authorization': 'token YOUR_GITHUB_TOKEN',
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            title: `AI Readiness Survey - ${surveyData.name}`,
+            body: `## Survey Submission
+
+### User Details
+- **Name**: ${surveyData.name}
+- **Email**: ${surveyData.email}
+- **Company**: ${surveyData.company}
+- **Survey Type**: ${surveyData.surveyType}
+
+### Scores
+- **Total Score**: ${surveyData.totalScore}/25
+- **Readiness Level**: ${surveyData.readinessLevel}
+
+### Dimension Scores
+${surveyData.dimensionScores.map((score, index) => 
+    `- **Dimension ${index + 1}**: ${score}/5`
+).join('\n')}
+
+### Feedback
+- **Overall**: ${surveyData.overallFeedback}
+`,
+            labels: ['ai-readiness-survey']
+        })
+    });
+}
