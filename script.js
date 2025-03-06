@@ -373,35 +373,28 @@ function restartSurvey() {
         answers = [];
     }
 }
-function createGitHubIssue(surveyData) {
-    // WARNING: You'll need to replace placeholders
-    fetch('https://api.github.com/repos/peterbenei/aireadinessresults/issues', {
+unction createGitHubIssue(surveyData) {
+    fetch('https://api.github.com/repos/peterbenei/REPO/issues', {
         method: 'POST',
         headers: {
             'Authorization': 'token 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',
             'Content-Type': 'application/json'
         },
         body: JSON.stringify({
-            title: `AI Readiness Survey - ${userData.name}`,
-            body: `## Survey Results
-
-### Personal Info
-- **Name**: ${userData.name}
-- **Email**: ${userData.email}
-- **Company**: ${userData.company}
-
-### Survey Details
-- **Survey Type**: ${currentSurvey}
-- **Total Score**: ${totalScore}/25
-- **Readiness Level**: ${readinessLevel}
-
-### Dimension Scores
-1. First Dimension: ${scores[0]}/5
-2. Second Dimension: ${scores[1]}/5
-3. Third Dimension: ${scores[2]}/5
-4. Fourth Dimension: ${scores[3]}/5
-5. Fifth Dimension: ${scores[4]}/5
-`,
+            title: `AI Readiness Survey - ${surveyData.name}`,
+            body: `[SURVEY_DATA]
+NAME: ${surveyData.name}
+EMAIL: ${surveyData.email}
+COMPANY: ${surveyData.company}
+SURVEY_TYPE: ${surveyData.surveyType}
+TOTAL_SCORE: ${surveyData.totalScore}
+READINESS_LEVEL: ${surveyData.readinessLevel}
+DIMENSION_1: ${surveyData.dimensionScores[0]}
+DIMENSION_2: ${surveyData.dimensionScores[1]}
+DIMENSION_3: ${surveyData.dimensionScores[2]}
+DIMENSION_4: ${surveyData.dimensionScores[3]}
+DIMENSION_5: ${surveyData.dimensionScores[4]}
+[/SURVEY_DATA]`,
             labels: ['ai-readiness-survey']
         })
     });
