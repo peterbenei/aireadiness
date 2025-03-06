@@ -374,8 +374,8 @@ function restartSurvey() {
     }
 }
 function createGitHubIssue(surveyData) {
-    // You'll need to use GitHub API or a service like GitHub Actions
-    fetch('YOUR_GITHUB_API_ENDPOINT', {
+    // You'll need to replace with your actual GitHub API details
+    fetch('https://api.github.com/repos/YOUR-USERNAME/ai-readiness-survey-results/issues', {
         method: 'POST',
         headers: {
             'Authorization': 'token YOUR_GITHUB_TOKEN',
@@ -396,14 +396,31 @@ function createGitHubIssue(surveyData) {
 - **Readiness Level**: ${surveyData.readinessLevel}
 
 ### Dimension Scores
-${surveyData.dimensionScores.map((score, index) => 
-    `- **Dimension ${index + 1}**: ${score}/5`
-).join('\n')}
-
-### Feedback
-- **Overall**: ${surveyData.overallFeedback}
+- Dimension 1: ${surveyData.dimensionScores[0]}/5
+- Dimension 2: ${surveyData.dimensionScores[1]}/5
+- Dimension 3: ${surveyData.dimensionScores[2]}/5
+- Dimension 4: ${surveyData.dimensionScores[3]}/5
+- Dimension 5: ${surveyData.dimensionScores[4]}/5
 `,
             labels: ['ai-readiness-survey']
         })
     });
+}
+
+// Modify your existing showResults function to call this:
+function showResults() {
+    // ... existing result calculation code ...
+
+    // Add this at the end of the function
+    const surveyData = {
+        name: userData.name,
+        email: userData.email,
+        company: userData.company,
+        surveyType: currentSurvey,
+        totalScore: totalScore,
+        readinessLevel: readinessLevel,
+        dimensionScores: scores
+    };
+
+    createGitHubIssue(surveyData);
 }
