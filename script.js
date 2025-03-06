@@ -1,3 +1,4 @@
+// No registration form needed anymore as Tally handles it
 // Function to save answers for current category
 function saveCurrentCategoryAnswers() {
     const category = currentCategory;
