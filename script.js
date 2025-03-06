@@ -251,14 +251,6 @@ function showResults() {
         `;
     });
     
-    // Display next steps
-    const nextStepsContainer = document.getElementById('next-steps');
-    nextStepsContainer.innerHTML = '<h2>Recommended Next Steps</h2>';
-    
-    nextSteps.forEach(step => {
-        nextStepsContainer.innerHTML += `<div class="next-step">${step}</div>`;
-    });
-    
     // Create radar chart
     createRadarChart(scores, survey.categories);
     
