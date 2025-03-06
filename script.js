@@ -375,10 +375,10 @@ function restartSurvey() {
 }
 function createGitHubIssue(surveyData) {
     // WARNING: You'll need to replace placeholders
-    fetch('https://api.github.com/repos/YOUR-GITHUB-USERNAME/ai-readiness-survey-results/issues', {
+    fetch('https://api.github.com/repos/peterbenei/aireadinessresults/issues', {
         method: 'POST',
         headers: {
-            'Authorization': 'token YOUR-GITHUB-TOKEN',
+            'Authorization': 'token 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',
             'Content-Type': 'application/json'
         },
         body: JSON.stringify({
