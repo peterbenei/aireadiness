@@ -13,28 +13,30 @@
             <h1>AI Readiness Assessment</h1>
             <p>Discover how prepared you are for the AI revolution in marketing.</p>
             
-            <!-- Registration Form -->
-<section id="user-type-section" class="section">
-    <h1>Select Your Role</h1>
-    <p>Choose the assessment that best matches your position:</p>
-    
-    <div class="role-cards">
-        <div class="role-card" data-role="individual">
-            <h3>Individual Contributor</h3>
-            <p>For marketing professionals who want to assess their personal AI readiness</p>
-        </div>
-        
-        <div class="role-card" data-role="team">
-            <h3>Team Leader</h3>
-            <p>For marketing managers who want to assess their team's AI readiness</p>
-        </div>
-        
-        <div class="role-card" data-role="organization">
-            <h3>CEO/Founder</h3>
-            <p>For executives who want to assess their entire organization's AI readiness</p>
-        </div>
-    </div>
-</section>
+            <form id="registration-form">
+                <div class="form-group">
+                    <label for="name">Full Name</label>
+                    <input type="text" id="name" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="email">Email Address</label>
+                    <input type="email" id="email" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="company">Company Name</label>
+                    <input type="text" id="company">
+                </div>
+                
+                <div class="form-checkbox">
+                    <input type="checkbox" id="consent" required>
+                    <label for="consent">I agree to the privacy policy and consent to being contacted about my assessment results.</label>
+                </div>
+                
+                <button type="submit" class="btn primary-btn">Start Assessment</button>
+            </form>
+        </section>
 
         <!-- User Type Selection -->
         <section id="user-type-section" class="section hidden">
