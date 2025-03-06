@@ -1,162 +1,175 @@
-// Store user data
-let userData = {
-    name: '',
-    email: '',
-    company: ''
+// User and Survey State Management
+const state = {
+    userData: {
+        name: '',
+        email: '',
+        company: ''
+    },
+    currentSurvey: null,
+    currentCategory: 0,
+    answers: []
 };
 
-// Current survey state
-let currentSurvey = null;
-let currentCategory = 0;
-let answers = [];
+// DOM Element Selectors
+const elements = {
+    registrationSection: document.getElementById('registration-section'),
+    userTypeSection: document.getElementById('user-type-section'),
+    surveySection: document.getElementById('survey-section'),
+    resultsSection: document.getElementById('results-section')
+};
 
-// DOM elements
-const registrationSection = document.getElementById('registration-section');
-const userTypeSection = document.getElementById('user-type-section');
-const surveySection = document.getElementById('survey-section');
-const resultsSection = document.getElementById('results-section');
+// Initialize Event Listeners
+function initializeEventListeners() {
+    document.addEventListener('DOMContentLoaded', () => {
+        // Registration Form Submission
+        const registrationForm = document.getElementById('registration-form');
+        if (registrationForm) {
+            registrationForm.addEventListener('submit', handleRegistrationSubmit);
+        }
 
-// Event Listeners
-document.addEventListener('DOMContentLoaded', function() {
-    // Registration form submission
-    if (document.getElementById('registration-form')) {
-        document.getElementById('registration-form').addEventListener('submit', function(e) {
-            e.preventDefault();
-            
-            // Store user data
-            userData.name = document.getElementById('name').value;
-            userData.email = document.getElementById('email').value;
-            userData.company = document.getElementById('company').value;
-            
-            // Show user type selection
-            registrationSection.classList.add('hidden');
-            userTypeSection.classList.remove('hidden');
+        // Role Card Selection
+        document.querySelectorAll('.role-card').forEach(card => {
+            card.addEventListener('click', () => selectUserType(card.getAttribute('data-role')));
         });
-    }
-    
-    // Role card selection
-    document.querySelectorAll('.role-card').forEach(card => {
-        card.addEventListener('click', function() {
-            const role = this.getAttribute('data-role');
-            selectUserType(role);
-        });
+
+        // Navigation Buttons
+        document.getElementById('prev-btn').addEventListener('click', previousCategory);
+        document.getElementById('next-btn').addEventListener('click', nextCategory);
+
+        // Results Action Buttons
+        setupResultsActionButtons();
     });
-    
-    // Navigation buttons
-    document.getElementById('prev-btn').addEventListener('click', previousCategory);
-    document.getElementById('next-btn').addEventListener('click', nextCategory);
-    
-    // Action buttons in results
-    document.getElementById('share-linkedin').addEventListener('click', shareToLinkedIn);
-    document.getElementById('share-twitter').addEventListener('click', shareToTwitter);
-    document.getElementById('contact-btn').addEventListener('click', contactUs);
-    document.getElementById('restart-btn').addEventListener('click', restartSurvey);
-});
+}
 
-// Function to select user type and start appropriate survey
+// Registration Submission Handler
+function handleRegistrationSubmit(e) {
+    e.preventDefault();
+    
+    // Store user data
+    state.userData.name = document.getElementById('name').value;
+    state.userData.email = document.getElementById('email').value;
+    state.userData.company = document.getElementById('company').value;
+    
+    // Show user type selection
+    elements.registrationSection.classList.add('hidden');
+    elements.userTypeSection.classList.remove('hidden');
+}
+
+// Set Up Results Action Buttons
+function setupResultsActionButtons() {
+    document.getElementById('share-linkedin')?.addEventListener('click', shareToLinkedIn);
+    document.getElementById('share-twitter')?.addEventListener('click', shareToTwitter);
+    document.getElementById('contact-btn')?.addEventListener('click', contactUs);
+    document.getElementById('restart-btn')?.addEventListener('click', restartSurvey);
+}
+
+// Select User Type and Start Survey
 function selectUserType(type) {
-    currentSurvey = type;
-    userTypeSection.classList.add('hidden');
-    surveySection.classList.remove('hidden');
+    state.currentSurvey = type;
+    elements.userTypeSection.classList.add('hidden');
+    elements.surveySection.classList.remove('hidden');
     
-    // Initialize the survey
+    // Select appropriate assessment based on user type
     const survey = type === 'individual' ? individualAssessment : 
-                  (type === 'team' ? teamAssessment : organizationAssessment);
+                   type === 'team' ? teamAssessment : organizationAssessment;
     
+    // Update survey header
     document.getElementById('survey-title').textContent = survey.title;
     document.getElementById('survey-description').textContent = survey.description;
     
-    // Initialize answers array with empty arrays for each category
-    answers = survey.categories.map(() => Array(5).fill(null));
+    // Initialize answers array
+    state.answers = survey.categories.map(() => Array(5).fill(null));
     
     // Show first category
     showCategory(0);
 }
 
-// Function to display current category questions
+// Display Current Category Questions
 function showCategory(index) {
-    currentCategory = index;
-    const survey = currentSurvey === 'individual' ? individualAssessment : 
-                  (currentSurvey === 'team' ? teamAssessment : organizationAssessment);
+    state.currentCategory = index;
+    
+    // Select appropriate survey based on current type
+    const survey = state.currentSurvey === 'individual' ? individualAssessment : 
+                   state.currentSurvey === 'team' ? teamAssessment : organizationAssessment;
     
     const category = survey.categories[index];
     
     // Update progress bar
-    const progress = ((index) / survey.categories.length) * 100;
-    document.getElementById('progress-fill').style.width = progress + '%';
-    document.getElementById('progress-text').textContent = `Dimension ${index + 1} of ${survey.categories.length}`;
+    updateProgressBar(index, survey.categories.length);
     
-    // Update category title and description
+    // Update category details
     document.getElementById('category-title').textContent = category.name;
     document.getElementById('category-description').textContent = category.description;
     
-    // Generate questions
-    const questionsContainer = document.getElementById('questions-container');
-    questionsContainer.innerHTML = '';
+    // Generate and display questions
+    renderCategoryQuestions(category.questions, index);
     
-    category.questions.forEach((question, qIndex) => {
-        const questionDiv = document.createElement('div');
-        questionDiv.className = 'question';
-        
-        const questionHTML = `
+    // Update navigation buttons
+    updateNavigationButtons(index, survey.categories.length);
+}
+
+// Update Progress Bar
+function updateProgressBar(currentIndex, totalCategories) {
+    const progress = ((currentIndex) / totalCategories) * 100;
+    document.getElementById('progress-fill').style.width = `${progress}%`;
+    document.getElementById('progress-text').textContent = `Dimension ${currentIndex + 1} of ${totalCategories}`;
+}
+
+// Render Category Questions
+function renderCategoryQuestions(questions, categoryIndex) {
+    const questionsContainer = document.getElementById('questions-container');
+    questionsContainer.innerHTML = questions.map((question, qIndex) => `
+        <div class="question">
             <p>${qIndex + 1}. ${question}</p>
             <div class="question-options">
                 <label class="option-label">
-                    <input type="radio" name="q${index}_${qIndex}" value="yes" ${answers[index][qIndex] === true ? 'checked' : ''}>
+                    <input type="radio" name="q${categoryIndex}_${qIndex}" value="yes" 
+                           ${state.answers[categoryIndex][qIndex] === true ? 'checked' : ''}>
                     <span class="option-text">YES</span>
                 </label>
                 <label class="option-label">
-                    <input type="radio" name="q${index}_${qIndex}" value="no" ${answers[index][qIndex] === false ? 'checked' : ''}>
+                    <input type="radio" name="q${categoryIndex}_${qIndex}" value="no" 
+                           ${state.answers[categoryIndex][qIndex] === false ? 'checked' : ''}>
                     <span class="option-text">NO</span>
                 </label>
             </div>
-        `;
-        
-        questionDiv.innerHTML = questionHTML;
-        questionsContainer.appendChild(questionDiv);
-    });
-    
-    // Update buttons
-    document.getElementById('prev-btn').disabled = index === 0;
-    document.getElementById('next-btn').textContent = index === survey.categories.length - 1 ? 'See Results' : 'Next';
+        </div>
+    `).join('');
 }
 
-// Function to save answers for current category
+// Update Navigation Buttons
+function updateNavigationButtons(index, totalCategories) {
+    document.getElementById('prev-btn').disabled = index === 0;
+    document.getElementById('next-btn').textContent = index === totalCategories - 1 ? 'See Results' : 'Next';
+}
+
+// Save Answers for Current Category
 function saveCurrentCategoryAnswers() {
-    const category = currentCategory;
+    const { currentCategory } = state;
     
-    let allAnswered = true;
-    
-    for (let qIndex = 0; qIndex < 5; qIndex++) {
-        const radioName = `q${category}_${qIndex}`;
-        const radioButtons = document.getElementsByName(radioName);
-        let answered = false;
+    const allAnswered = Array.from({length: 5}, (_, qIndex) => {
+        const radioName = `q${currentCategory}_${qIndex}`;
+        const selectedRadio = document.querySelector(`input[name="${radioName}"]:checked`);
         
-        for (const radioButton of radioButtons) {
-            if (radioButton.checked) {
-                answers[category][qIndex] = radioButton.value === 'yes';
-                answered = true;
-                break;
-            }
+        if (selectedRadio) {
+            state.answers[currentCategory][qIndex] = selectedRadio.value === 'yes';
+            return true;
         }
-        
-        if (!answered) {
-            allAnswered = false;
-        }
-    }
+        return false;
+    }).every(Boolean);
     
     return allAnswered;
 }
 
-// Function to navigate to previous category
+// Navigate to Previous Category
 function previousCategory() {
     saveCurrentCategoryAnswers();
-    if (currentCategory > 0) {
-        showCategory(currentCategory - 1);
+    if (state.currentCategory > 0) {
+        showCategory(state.currentCategory - 1);
     }
 }
 
-// Function to navigate to next category or show results
+// Navigate to Next Category or Show Results
 function nextCategory() {
     const allAnswered = saveCurrentCategoryAnswers();
     
@@ -165,224 +178,35 @@ function nextCategory() {
         return;
     }
     
-    const survey = currentSurvey === 'individual' ? individualAssessment : 
-                  (currentSurvey === 'team' ? teamAssessment : organizationAssessment);
+    const survey = state.currentSurvey === 'individual' ? individualAssessment : 
+                   state.currentSurvey === 'team' ? teamAssessment : organizationAssessment;
     
-    if (currentCategory < survey.categories.length - 1) {
-        showCategory(currentCategory + 1);
+    if (state.currentCategory < survey.categories.length - 1) {
+        showCategory(state.currentCategory + 1);
     } else {
         showResults();
     }
 }
 
-// Function to calculate scores and show results
-function showResults() {
-    surveySection.classList.add('hidden');
-    resultsSection.classList.remove('hidden');
-    
-    // Calculate scores for each category
-    const scores = answers.map(categoryAnswers => {
-        return categoryAnswers.filter(answer => answer === true).length;
-    });
-    
-    // Calculate total score
-    const totalScore = scores.reduce((sum, score) => sum + score, 0);
-    
-    // Get feedback based on survey type
-    let readinessLevel, overallFeedback, categoryFeedback, nextSteps;
-    const survey = currentSurvey === 'individual' ? individualAssessment : 
-                  (currentSurvey === 'team' ? teamAssessment : organizationAssessment);
-    
-    // Determine readiness level
-    const levelIndex = Math.min(Math.floor(totalScore / 5), 4);
-    overallFeedback = survey.overallFeedback[levelIndex];
-    
-    if (currentSurvey === 'individual') {
-        readinessLevel = totalScore <= 5 ? "AI Novice" :
-                        totalScore <= 10 ? "AI Aware" :
-                        totalScore <= 15 ? "AI Adapting" :
-                        totalScore <= 20 ? "AI Proficient" : "AI Leader";
-    } else if (currentSurvey === 'team') {
-        readinessLevel = totalScore <= 5 ? "AI Novice Team" :
-                        totalScore <= 10 ? "AI Aware Team" :
-                        totalScore <= 15 ? "AI Adapting Team" :
-                        totalScore <= 20 ? "AI Proficient Team" : "AI Leader Team";
-    } else {
-        readinessLevel = totalScore <= 5 ? "AI Novice Organization" :
-                        totalScore <= 10 ? "AI Aware Organization" :
-                        totalScore <= 15 ? "AI Adapting Organization" :
-                        totalScore <= 20 ? "AI Proficient Organization" : "AI Leader Organization";
-    }
-    
-    // Get category-specific feedback
-    categoryFeedback = scores.map((score, index) => {
-        // Adjust score to be 0-based index for the array
-        const feedbackIndex = Math.max(0, Math.min(score - 1, 4));
-        return score === 0 ? survey.categoryFeedback[index][0] : survey.categoryFeedback[index][feedbackIndex];
-    });
-    
-    // Find the weakest areas
-    const weakestAreas = [];
-    const minScore = Math.min(...scores);
-    survey.categories.forEach((category, index) => {
-        if (scores[index] === minScore) {
-            weakestAreas.push(category.name);
-        }
-    });
-    
-    // Get next steps
-    nextSteps = survey.getNextSteps(weakestAreas);
-    
-    // Display results
-    document.getElementById('readiness-level').textContent = readinessLevel;
-    document.getElementById('total-score').textContent = `Your Total Score: ${totalScore}/25`;
-    document.getElementById('overall-feedback').textContent = overallFeedback;
-    
-    // Display dimension results
-    const dimensionResults = document.getElementById('dimension-results');
-    dimensionResults.innerHTML = '<h2>Dimension Scores</h2>';
-    
-    scores.forEach((score, index) => {
-        dimensionResults.innerHTML += `
-            <div class="dimension-card">
-                <h3>${survey.categories[index].name}: ${score}/5</h3>
-                <p>${categoryFeedback[index]}</p>
-            </div>
-        `;
-    });
-    
-    // Create radar chart
-    createRadarChart(scores, survey.categories);
-    
-    // Prepare for social sharing
-    prepareSharing(readinessLevel, totalScore);
-}
-
-// Function to create radar chart
-function createRadarChart(scores, categories) {
-    const ctx = document.getElementById('radar-chart').getContext('2d');
-    
-    // Prepare data
-    const labels = categories.map(category => category.name);
-    
-    if (window.resultChart) {
-        window.resultChart.destroy();
-    }
-    
-    // Create new chart
-    window.resultChart = new Chart(ctx, {
-        type: 'radar',
-        data: {
-            labels: labels,
-            datasets: [{
-                label: 'Your Score',
-                data: scores,
-                backgroundColor: 'rgba(227, 44, 30, 0.2)',
-                borderColor: 'rgba(227, 44, 30, 1)',
-                pointBackgroundColor: 'rgba(227, 44, 30, 1)',
-                pointBorderColor: '#fff',
-                pointHoverBackgroundColor: '#fff',
-                pointHoverBorderColor: 'rgba(227, 44, 30, 1)'
-            }]
-        },
-        options: {
-            scales: {
-                r: {
-                    angleLines: {
-                        display: true
-                    },
-                    suggestedMin: 0,
-                    suggestedMax: 5,
-                    ticks: {
-                        stepSize: 1
-                    }
-                }
-            },
-            plugins: {
-                legend: {
-                    display: false
-                }
-            }
-        }
-    });
-}
-
-// Function to prepare social sharing
-function prepareSharing(readinessLevel, totalScore) {
-    window.sharingData = {
-        level: readinessLevel,
-        score: totalScore,
-        surveyType: currentSurvey
-    };
-}
-
-// Function to share to LinkedIn
-function shareToLinkedIn() {
-    const shareText = `I took the Horizon 01 AI Readiness Assessment and scored ${window.sharingData.score}/25 - ${window.sharingData.level}! Assess your own AI readiness at: `;
-    const shareUrl = window.location.href;
-    
-    // Create the LinkedIn sharing URL
-    const linkedInUrl = `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(shareUrl)}&summary=${encodeURIComponent(shareText)}`;
-    
-    // Open in a new window
-    window.open(linkedInUrl, '_blank');
-}
-
-// Function to share to Twitter
-function shareToTwitter() {
-    const shareText = `I scored ${window.sharingData.score}/25 on the Horizon 01 AI Readiness Assessment - ${window.sharingData.level}! How AI-ready are you?`;
-    const shareUrl = window.location.href;
-    
-    // Create the Twitter sharing URL
-    const twitterUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}&url=${encodeURIComponent(shareUrl)}`;
-    
-    // Open in a new window
-    window.open(twitterUrl, '_blank');
-}
-
-// Function to handle contact button
-function contactUs() {
-    // Redirect to your contact page - UPDATE THIS URL TO YOUR ACTUAL CONTACT PAGE
-    window.location.href = 'https://anywhere.consulting/contact';
-}
-
-// Function to restart the survey
-function restartSurvey() {
-    // Reset all sections
-    resultsSection.classList.add('hidden');
-    
-    // If using registration form
-    if (registrationSection) {
-        registrationSection.classList.remove('hidden');
-        
-        // Clear user data and answers
-        userData = { name: '', email: '', company: '' };
-        currentSurvey = null;
-        currentCategory = 0;
-        answers = [];
-        
-        // Reset form
-        document.getElementById('registration-form').reset();
-    } else {
-        // If bypassing registration form and going straight to type selection
-        userTypeSection.classList.remove('hidden');
-        
-        // Clear survey data
-        currentSurvey = null;
-        currentCategory = 0;
-        answers = [];
-    }
-}
-unction createGitHubIssue(surveyData) {
-    fetch('https://api.github.com/repos/peterbenei/REPO/issues', {
+// GitHub Issue Creation
+function createGitHubIssue(surveyData) {
+    fetch('https://api.github.com/repos/peterbenei/aireadinesssurvey/issues', {
         method: 'POST',
         headers: {
-            'Authorization': 'token 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',
+            'Authorization': 'token YOUR_GITHUB_TOKEN',
             'Content-Type': 'application/json'
         },
         body: JSON.stringify({
             title: `AI Readiness Survey - ${surveyData.name}`,
-            body: `[SURVEY_DATA]
+            body: formatIssueBody(surveyData),
+            labels: ['ai-readiness-survey']
+        })
+    }).catch(error => console.error('GitHub Issue Creation Failed:', error));
+}
+
+// Format Issue Body
+function formatIssueBody(surveyData) {
+    return `[SURVEY_DATA]
 NAME: ${surveyData.name}
 EMAIL: ${surveyData.email}
 COMPANY: ${surveyData.company}
@@ -394,26 +218,8 @@ DIMENSION_2: ${surveyData.dimensionScores[1]}
 DIMENSION_3: ${surveyData.dimensionScores[2]}
 DIMENSION_4: ${surveyData.dimensionScores[3]}
 DIMENSION_5: ${surveyData.dimensionScores[4]}
-[/SURVEY_DATA]`,
-            labels: ['ai-readiness-survey']
-        })
-    });
+[/SURVEY_DATA]`;
 }
 
-// Modify your existing showResults function to call this:
-function showResults() {
-    // ... existing result calculation code ...
-
-    // Add this at the end of the function
-    const surveyData = {
-        name: userData.name,
-        email: userData.email,
-        company: userData.company,
-        surveyType: currentSurvey,
-        totalScore: totalScore,
-        readinessLevel: readinessLevel,
-        dimensionScores: scores
-    };
-
-    createGitHubIssue(surveyData);
-}
+// Initialize the application
+initializeEventListeners();
